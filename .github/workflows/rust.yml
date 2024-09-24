@@ -1,0 +1,29 @@
+name: Generate Rust Docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+
+    - name: Generate documentation
+      run: cargo doc --no-deps
+
+    - name: Deploy to rust_document
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./target/doc
+        publish_branch: test_$(rustc --version | awk '{print $2}' | tr -d '.')
