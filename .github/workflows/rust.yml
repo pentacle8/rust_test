@@ -21,9 +21,13 @@ jobs:
     - name: Generate documentation
       run: cargo doc --no-deps
 
+    - name: Get Rust version
+      id: rust_version
+      run: echo "::set-output name=version::$(rustc --version | awk '{print $2}' | tr -d '.')"
+
     - name: Deploy to rust_document
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./target/doc
-        publish_branch: test_$(rustc --version | awk '{print $2}' | tr -d '.')
+        publish_branch: test_${{ steps.rust_version.outputs.version }}
