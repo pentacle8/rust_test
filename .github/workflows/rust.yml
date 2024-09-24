@@ -25,16 +25,23 @@ jobs:
       id: rust_version
       run: echo "::set-output name=version::$(rustc --version | awk '{print $2}' | tr -d '.')"
 
+    - name: Get Repository Name
+      id: repo_name
+      run: echo "::set-output name=name::$(basename -s .git `git config --get remote.origin.url`)"
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
     - name: Deploy to rust_document
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/pentacle8/rust_document.git
+        git clone git@github.com:pentacle8/rust_document.git
         cd rust_document
-        git checkout -b test_${{ steps.rust_version.outputs.version }}
+        git checkout -b ${{ steps.repo_name.outputs.name }}_${{ steps.rust_version.outputs.version }}
         cp -r ../target/doc/* .
         git add .
         git commit -m "Update documentation"
-        git push origin test_${{ steps.rust_version.outputs.version }}
+        git push origin ${{ steps.repo_name.outputs.name }}_${{ steps.rust_version.outputs.version }}
