@@ -26,8 +26,15 @@ jobs:
       run: echo "::set-output name=version::$(rustc --version | awk '{print $2}' | tr -d '.')"
 
     - name: Deploy to rust_document
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        personal_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        publish_dir: ./target/doc
-        publish_branch: test_${{ steps.rust_version.outputs.version }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git clone https://github.com/pentacle8/rust_document.git
+        cd rust_document
+        git checkout -b test_${{ steps.rust_version.outputs.version }}
+        cp -r ../target/doc/* .
+        git add .
+        git commit -m "Update documentation"
+        git push origin test_${{ steps.rust_version.outputs.version }}
