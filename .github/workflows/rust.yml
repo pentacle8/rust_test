@@ -23,7 +23,9 @@ jobs:
 
     - name: Get Rust version
       id: rust_version
-      run: echo "::set-output name=version::$(rustc --version | awk '{print $2}' | tr -d '.')"
+      run: |
+        VERSION=$(rustc --version | awk '{print $2}' | tr '.' '_')
+        echo "::set-output name=version::v$VERSION"
 
     - name: Get Repository Name
       id: repo_name
